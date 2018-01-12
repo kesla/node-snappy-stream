@@ -15,13 +15,13 @@
   "license": "MIT",
   "devDependencies": {
     "async-benchmark": "^1.0.0",
-    "tap": "^2.0.0"
+    "tap": "^11.0.1"
   },
   "dependencies": {
     "bl": "^1.0.0",
-    "buffer-equal": "0.0.1",
+    "buffer-equal": "1.0.0",
     "fast-crc32c": "^1.0.1",
-    "snappy": "^4.0.3"
+    "snappy": "^6.0.1"
   },
   "directories": {
     "test": "test"

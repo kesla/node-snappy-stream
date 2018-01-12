@@ -1,9 +1,7 @@
-env:
-  - CC=clang CXX=clang++ npm_config_clang=1
 language: node_js
 node_js:
-  - "0.10"
-  - "4"
+  - 6
+  - 8
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install libsnappy-dev
