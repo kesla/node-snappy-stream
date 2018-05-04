@@ -151,7 +151,6 @@ test('uncompress large String in small pieces', function (t) {
 })
 
 test('uncompress small Buffer across multiple chunks', function (t) {
-  // TODO: make this test pass
   var uncompressStream = createUncompressStream()
     , data = []
     , IDENTIFIER = new Buffer([
@@ -175,4 +174,42 @@ test('uncompress small Buffer across multiple chunks', function (t) {
   // " boop"
   uncompressStream.write(new Buffer([0x01, 0x09, 0x00, 0x00, 0x5f, 0xae, 0xb4, 0x84, 0x20, 0x62, 0x6f, 0x6f, 0x70]))
   uncompressStream.end()
+})
+
+test('uncompress large string', function (t) {
+  var child1 = spawn('python', [ '-m', 'snappy', '-c' ])
+    , child2 = spawn('python', [ '-m', 'snappy', '-c' ])
+    , IDENTIFIER = new Buffer([
+        0xff, 0x06, 0x00, 0x00, 0x73, 0x4e, 0x61, 0x50, 0x70, 0x59
+      ])
+    , uncompressStream = createUncompressStream({ asBuffer: false })
+    , data = ''
+
+  uncompressStream.on('data', function (chunk) {
+    data = data + chunk
+    t.equal(typeof(chunk), 'string')
+  })
+
+  uncompressStream.on('end', function () {
+    t.equal(data, largerInputString + largerInputString)
+    t.end()
+  })
+
+  // manually pipe processes in remove identifiers
+  child1.stdout.on('data', function(chunk) {
+    uncompressStream.write(chunk.slice(10))
+  })
+  child2.stdout.on('data', function(chunk) {
+    uncompressStream.write(chunk.slice(10))
+    uncompressStream.end()
+  })
+
+  uncompressStream.write(IDENTIFIER)
+
+  child1.stdin.write(largerInput)
+  child1.stdin.end()
+
+  // trigger second write after first write
+  child2.stdin.write(largerInput)
+  child2.stdin.end()
 })
