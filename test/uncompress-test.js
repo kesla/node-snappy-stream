@@ -237,6 +237,7 @@ test('uncompress large string with padding chunks', function (t) {
   // manually pipe processes in so we can remove identifiers
   child1.stdout.on('data', function(chunk) {
     uncompressStream.write(chunk.slice(10))
+    // padding
     uncompressStream.write(Buffer.from([0xfe, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]))
   })
   child2.stdout.on('data', function(chunk) {
