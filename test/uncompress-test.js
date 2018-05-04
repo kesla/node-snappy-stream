@@ -149,3 +149,30 @@ test('uncompress large String in small pieces', function (t) {
   child.stdin.write(largerInput)
   child.stdin.end()
 })
+
+test('uncompress small Buffer', function (t) {
+  // TODO: make this test pass
+  var uncompressStream = createUncompressStream()
+    , data = []
+    , IDENTIFIER = new Buffer([
+      0x0, 0x06, 0x00, 0x00, 0x73, 0x4e, 0x61, 0x50, 0x70, 0x59
+    ])
+
+  uncompressStream.on('data', function (chunk) {
+    data.push(chunk)
+    t.ok(Buffer.isBuffer(chunk))
+  })
+
+  uncompressStream.on('end', function () {
+    t.deepEqual(Buffer.concat(data), new Buffer('beep boop'))
+    t.end()
+  })
+
+  // identifier
+  uncompressStream.write(IDENTIFIER)
+  // "beep"
+  uncompressStream.write(new Buffer([0x01, 0x08, 0x00, 0x00, 0xfb, 0x5e, 0xc9, 0x6e, 0x62, 0x65, 0x65, 0x70]))
+  // " boop"
+  uncompressStream.write(new Buffer([0x01, 0x09, 0x00, 0x00, 0x5f, 0xae, 0xb4, 0x84, 0x20, 0x62, 0x6f, 0x6f, 0x70]))
+  uncompressStream.end()
+})
