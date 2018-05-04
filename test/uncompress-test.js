@@ -150,7 +150,7 @@ test('uncompress large String in small pieces', function (t) {
   child.stdin.end()
 })
 
-test('uncompress small Buffer', function (t) {
+test('uncompress small Buffer across multiple chunks', function (t) {
   // TODO: make this test pass
   var uncompressStream = createUncompressStream()
     , data = []
