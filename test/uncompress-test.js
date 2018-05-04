@@ -176,7 +176,7 @@ test('uncompress small Buffer across multiple chunks', function (t) {
   uncompressStream.end()
 })
 
-test('uncompress large string', function (t) {
+test('uncompress large string across multiple chunks', function (t) {
   var child1 = spawn('python', [ '-m', 'snappy', '-c' ])
     , child2 = spawn('python', [ '-m', 'snappy', '-c' ])
     , IDENTIFIER = new Buffer([
@@ -195,7 +195,7 @@ test('uncompress large string', function (t) {
     t.end()
   })
 
-  // manually pipe processes in remove identifiers
+  // manually pipe processes in so we can remove identifiers
   child1.stdout.on('data', function(chunk) {
     uncompressStream.write(chunk.slice(10))
   })
@@ -204,6 +204,47 @@ test('uncompress large string', function (t) {
     uncompressStream.end()
   })
 
+  // write identifier only once
+  uncompressStream.write(IDENTIFIER)
+
+  child1.stdin.write(largerInput)
+  child1.stdin.end()
+
+  // trigger second write after first write
+  child2.stdin.write(largerInput)
+  child2.stdin.end()
+})
+
+test('uncompress large string with padding chunks', function (t) {
+  var child1 = spawn('python', [ '-m', 'snappy', '-c' ])
+    , child2 = spawn('python', [ '-m', 'snappy', '-c' ])
+    , IDENTIFIER = new Buffer([
+        0xff, 0x06, 0x00, 0x00, 0x73, 0x4e, 0x61, 0x50, 0x70, 0x59
+      ])
+    , uncompressStream = createUncompressStream({ asBuffer: false })
+    , data = ''
+
+  uncompressStream.on('data', function (chunk) {
+    data = data + chunk
+    t.equal(typeof(chunk), 'string')
+  })
+
+  uncompressStream.on('end', function () {
+    t.equal(data, largerInputString + largerInputString)
+    t.end()
+  })
+
+  // manually pipe processes in so we can remove identifiers
+  child1.stdout.on('data', function(chunk) {
+    uncompressStream.write(chunk.slice(10))
+    uncompressStream.write(Buffer.from([0xfe, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]))
+  })
+  child2.stdout.on('data', function(chunk) {
+    uncompressStream.write(chunk.slice(10))
+    uncompressStream.end()
+  })
+
+  // write identifier only once
   uncompressStream.write(IDENTIFIER)
 
   child1.stdin.write(largerInput)
