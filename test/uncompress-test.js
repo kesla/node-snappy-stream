@@ -149,3 +149,109 @@ test('uncompress large String in small pieces', function (t) {
   child.stdin.write(largerInput)
   child.stdin.end()
 })
+
+test('uncompress small Buffer across multiple chunks', function (t) {
+  var uncompressStream = createUncompressStream()
+    , data = []
+    , IDENTIFIER = new Buffer([
+      0xff, 0x06, 0x00, 0x00, 0x73, 0x4e, 0x61, 0x50, 0x70, 0x59
+    ])
+
+  uncompressStream.on('data', function (chunk) {
+    data.push(chunk)
+    t.ok(Buffer.isBuffer(chunk))
+  })
+
+  uncompressStream.on('end', function () {
+    t.deepEqual(Buffer.concat(data), new Buffer('beep boop'))
+    t.end()
+  })
+
+  // identifier
+  uncompressStream.write(IDENTIFIER)
+  // "beep"
+  uncompressStream.write(new Buffer([0x01, 0x08, 0x00, 0x00, 0xfb, 0x5e, 0xc9, 0x6e, 0x62, 0x65, 0x65, 0x70]))
+  // " boop"
+  uncompressStream.write(new Buffer([0x01, 0x09, 0x00, 0x00, 0x5f, 0xae, 0xb4, 0x84, 0x20, 0x62, 0x6f, 0x6f, 0x70]))
+  uncompressStream.end()
+})
+
+test('uncompress large string across multiple chunks', function (t) {
+  var child1 = spawn('python', [ '-m', 'snappy', '-c' ])
+    , child2 = spawn('python', [ '-m', 'snappy', '-c' ])
+    , IDENTIFIER = new Buffer([
+        0xff, 0x06, 0x00, 0x00, 0x73, 0x4e, 0x61, 0x50, 0x70, 0x59
+      ])
+    , uncompressStream = createUncompressStream({ asBuffer: false })
+    , data = ''
+
+  uncompressStream.on('data', function (chunk) {
+    data = data + chunk
+    t.equal(typeof(chunk), 'string')
+  })
+
+  uncompressStream.on('end', function () {
+    t.equal(data, largerInputString + largerInputString)
+    t.end()
+  })
+
+  // manually pipe processes in so we can remove identifiers
+  child1.stdout.on('data', function(chunk) {
+    uncompressStream.write(chunk.slice(10))
+  })
+  child2.stdout.on('data', function(chunk) {
+    uncompressStream.write(chunk.slice(10))
+    uncompressStream.end()
+  })
+
+  // write identifier only once
+  uncompressStream.write(IDENTIFIER)
+
+  child1.stdin.write(largerInput)
+  child1.stdin.end()
+
+  // trigger second write after first write
+  child2.stdin.write(largerInput)
+  child2.stdin.end()
+})
+
+test('uncompress large string with padding chunks', function (t) {
+  var child1 = spawn('python', [ '-m', 'snappy', '-c' ])
+    , child2 = spawn('python', [ '-m', 'snappy', '-c' ])
+    , IDENTIFIER = new Buffer([
+        0xff, 0x06, 0x00, 0x00, 0x73, 0x4e, 0x61, 0x50, 0x70, 0x59
+      ])
+    , uncompressStream = createUncompressStream({ asBuffer: false })
+    , data = ''
+
+  uncompressStream.on('data', function (chunk) {
+    data = data + chunk
+    t.equal(typeof(chunk), 'string')
+  })
+
+  uncompressStream.on('end', function () {
+    t.equal(data, largerInputString + largerInputString)
+    t.end()
+  })
+
+  // manually pipe processes in so we can remove identifiers
+  child1.stdout.on('data', function(chunk) {
+    uncompressStream.write(chunk.slice(10))
+    // padding
+    uncompressStream.write(Buffer.from([0xfe, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]))
+  })
+  child2.stdout.on('data', function(chunk) {
+    uncompressStream.write(chunk.slice(10))
+    uncompressStream.end()
+  })
+
+  // write identifier only once
+  uncompressStream.write(IDENTIFIER)
+
+  child1.stdin.write(largerInput)
+  child1.stdin.end()
+
+  // trigger second write after first write
+  child2.stdin.write(largerInput)
+  child2.stdin.end()
+})
