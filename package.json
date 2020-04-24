@@ -18,10 +18,10 @@
     "tap": "^11.0.1"
   },
   "dependencies": {
-    "bl": "^1.0.0",
+    "bl": "~4.0.2",
     "buffer-equal": "1.0.0",
-    "fast-crc32c": "^1.0.1",
-    "snappy": "^6.0.1"
+    "fast-crc32c": "^2.0.0",
+    "snappy": "~6.3.4"
   },
   "directories": {
     "test": "test"
