@@ -18,7 +18,7 @@
     "tap": "^11.0.1"
   },
   "dependencies": {
-    "bl": "^1.0.0",
+    "bl": "^4.0.3",
     "buffer-alloc": "^1.2.0",
     "buffer-equal": "1.0.0",
     "buffer-from": "^1.1.1",
