@@ -1,6 +1,6 @@
 {
   "name": "@chainsafe/snappy-stream",
-  "version": "3.0.4",
+  "version": "5.0.0",
   "description": "Compress data over a Stream using the snappy framing format",
   "main": "index.js",
   "scripts": {
