@@ -11,7 +11,10 @@
     "stream",
     "framing"
   ],
-  "author": "David Björklund <david.bjorklund@gmail.com>",
+  "contributors": [
+    "David Björklund <david.bjorklund@gmail.com>",
+    "ChainSafe <info@chainsafe.io>"
+  ],
   "license": "MIT",
   "devDependencies": {
     "async-benchmark": "^1.0.0",
@@ -30,10 +33,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kesla/node-snappy-stream.git"
+    "url": "https://github.com/chainsafe/node-snappy-stream.git"
   },
   "bugs": {
-    "url": "https://github.com/kesla/node-snappy-stream/issues"
+    "url": "https://github.com/chainsafe/node-snappy-stream/issues"
   },
-  "homepage": "https://github.com/kesla/node-snappy-stream"
+  "homepage": "https://github.com/chainsafe/node-snappy-stream"
 }
